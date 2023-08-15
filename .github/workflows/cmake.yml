@@ -1,0 +1,38 @@
+name: cmake
+on:
+  push:
+    branches:
+    - main
+
+env:
+  REPOSITORY_NAME: AudioPluginTest
+  BUILD_TYPE: Release
+
+jobs:
+  build_plugin:
+    name: Windows build
+    runs-on: ${{ matrix.os.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - runner: windows-2019
+          name: windows
+          shell: powershell
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Get latest cmake
+      uses: lukka/get-cmake@latest
+
+    - name: Configure
+      working-directory: ${{ runner.workspace }}
+      run: cmake -S ${{ env.REPOSITORY_NAME }} -B ${{ runner.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+    - name: Build
+      working-directory: ${{ runner.workspace }}/build
+      run: cmake --build . --config ${{ env.BUILD_TYPE }}
